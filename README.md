@@ -3,7 +3,7 @@
 A clean and beginner-friendly **movie search web app** built using **React**, **TailwindCSS**, and the **OMDb API**.  
 Users can search for movies, view important details, and save their favorite titles — all inside a modern **dark-mode UI**.
 
-🌐 **Live Demo:** https://movie-info-ldllt2jey-raiyansyeds-projects.vercel.app/  
+🌐 **Live Demo:** https://movie-info-smoky-one.vercel.app/
 📦 **Repository:** https://github.com/raiyansyed/MovieInfo
 
 ---
