@@ -16,5 +16,3 @@ export async function searchMovies(query) {
   const data = await response.json();
   return data.results;
 }
-
-console.log(await searchMovies('iron man'));
