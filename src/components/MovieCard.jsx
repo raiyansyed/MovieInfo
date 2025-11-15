@@ -34,12 +34,13 @@ const handleCardClick = () => {
             <button
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 if (fav) removeFromfavs(movie.id);
                 else addTofavs(movie);
               }}
               className={`border border-gray-600 rounded-full w-8 h-8 absolute top-2 right-2 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 group-hover:pointer-events-auto ${
                 fav ? "bg-red-600" : "bg-gray-800"
-              }`}
+              } z-10`}
               aria-label="Add to favorites"
             >
               ♥
