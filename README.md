@@ -1,16 +1,111 @@
-# React + Vite
+# 🎬 MovieInfo  
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A clean and beginner-friendly **movie search web app** built using **React**, **TailwindCSS**, and the **OMDb API**.  
+Users can search for movies, view important details, and save their favorite titles — all inside a modern **dark-mode UI**.
 
-Currently, two official plugins are available:
+🌐 **Live Demo:** https://movie-info-ldllt2jey-raiyansyeds-projects.vercel.app/  
+📦 **Repository:** https://github.com/raiyansyed/MovieInfo
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- 🔍 **Search Movies** using the OMDb API  
+- ⭐ **Favorites System** (persistent using LocalStorage)  
+- 🌙 **Dark Mode UI** built with TailwindCSS  
+- 📱 Fully **responsive** on all screen sizes  
+- ⚡ **Fast and lightweight** React app deployed on Vercel  
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🛠️ Tech Stack
+
+| Technology     | Purpose                     |
+|----------------|-----------------------------|
+| **React.js**   | Frontend framework          |
+| **TailwindCSS**| UI styling & dark mode      |
+| **OMDb API**   | Movie data source           |
+| **LocalStorage** | Save favorite movies     |
+| **Vercel**     | Hosting & deployment        |
+
+---
+
+## 📸 Screenshots
+
+> *(Add screenshots here later)*  
+![Home Page](#)
+![Favorites Page](#)
+
+
+
+
+
+
+---
+
+## 📂 Project Structure
+
+```bash
+MovieInfo/
+├─ public/
+├─ src/
+│  ├─ assets/           # Static assets
+│  ├─ components/       # Reusable components
+│  │   ├─ MovieCard.jsx
+│  │   └─ NavBar.jsx
+│  ├─ context/          # Favorites context
+│  │   └─ FavContext.jsx
+│  ├─ pages/            # Home, Favorites pages
+│  │   ├─ Home.jsx
+│  │   └─ Favs.jsx
+│  ├─ service/          # API utilities & suggestions
+│  │   ├─ api.js
+│  │   └─ suggestions.js
+│  ├─ App.jsx           # Root App component
+│  ├─ main.jsx          # Entry point
+│  ├─ App.css
+│  └─ index.css         # TailwindCSS imports
+├─ .env
+├─ .gitignore
+├─ vite.config.js
+├─ tailwind.config.js
+├─ package.json
+└─ README.md
+
+
+```
+
+---
+
+## ⚙️ Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/raiyansyed/MovieInfo
+
+# Navigate into the project
+cd MovieInfo
+
+# Install dependencies
+npm install
+
+# Run the development server
+npm run dev
+
+```
+
+---
+
+
+## Create a .env file in the project root and add:
+
+```bash
+
+VITE_API_KEY= #your_api_key_here
+
+# You can request a free API key from: 
+https://www.omdbapi.com/
+
+```
+
+
