@@ -57,7 +57,8 @@ function MovieDetails() {
 
   const movieCast = movie.credits.cast;
   const sortedMovieCast = movieCast.sort((a, b) => b.popularity - a.popularity);
-  console.log(sortedMovieCast);
+
+  const relatedSiteName = movie.homepage.split('.')[1];
 
   return (
     <div className="relative min-h-screen">
@@ -130,6 +131,14 @@ function MovieDetails() {
               </span>
             </button>
 
+            {/* Related Sites */}
+            {movie.homepage && relatedSiteName && (
+              <div className="mb-6">
+              <h3 className="font-semibold mb-2 text-2xl">Related sites</h3>
+              <a href={movie.homepage} target="_blank" className="px-3 py-1 bg-[#403963] rounded-full text-sm">{relatedSiteName}</a>
+            </div>
+            )}
+
             {/* Genres */}
             <div className="mb-6">
               <h2 className="font-semibold mb-2 text-2xl">Generes</h2>
@@ -137,7 +146,7 @@ function MovieDetails() {
                 {movie.genres?.map((genre) => (
                   <span
                     key={genre.id}
-                    className="px-3 py-1 bg-[#403963] rounded-full text-sm"
+                    className="px-3 py-1 bg-[#403963] rounded-full text-sm cursor-default"
                   >
                     {genre.name}
                   </span>
@@ -155,7 +164,7 @@ function MovieDetails() {
               <h2 className="font-semibold mb-2 text-2xl">Languages Spoken in Movie</h2>
               <div className="flex flex-wrap gap-2">
                 {movie.spoken_languages.map(lan => (
-                <div className="px-3 py-1 text-sm rounded-full bg-[#403963]">{lan.english_name}</div>
+                <div className="px-3 py-1 text-sm rounded-full bg-[#403963] cursor-default">{lan.english_name}</div>
               ))}
               </div>
             </div>)}

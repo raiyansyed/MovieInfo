@@ -34,6 +34,7 @@ const handleCardClick = () => {
             <button
               onClick={(e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 if (fav) removeFromfavs(movie.id);
                 else addTofavs(movie);
               }}
