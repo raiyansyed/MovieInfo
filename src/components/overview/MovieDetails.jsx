@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useFavContext } from "../../context/FavContext";
 import { getMovieDetails } from "../../service/api";
 import { MovieCast } from "../index.js";
+import { searchYouTubeTrailer } from "../../service/youtubeSearch.js";
 import "./buttonAnimation.css";
 
 function MovieDetails() {
@@ -13,17 +14,25 @@ function MovieDetails() {
   const [error, setError] = useState(null);
   const { addTofavs, removeFromfavs, isFav } = useFavContext();
   const [isClicked, setIsClicked] = useState(false);
+  const [trailerKey, setTrailerKey] = useState(null);
+  const [trailerLoading, setTrailerLoading] = useState(false);
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
       try {
         const data = await getMovieDetails(id);
         setMovie(data);
+
+        setTrailerLoading(true);
+        const ytVideoKey = await searchYouTubeTrailer(data.title);
+        setTrailerKey(ytVideoKey);
+
       } catch (error) {
         console.error(error);
         setError("Failed to load Movie Details...");
       } finally {
         setLoading(false);
+        setTrailerLoading(false);
       }
     };
     fetchMovieDetails();
@@ -58,7 +67,8 @@ function MovieDetails() {
   const movieCast = movie.credits.cast;
   const sortedMovieCast = movieCast.sort((a, b) => b.popularity - a.popularity);
 
-  const relatedSiteName = movie.homepage.split(".")[1];
+  const relatedSiteName = movie.homepage ? movie.homepage.split(".")[1] : null;
+
 
   return (
     <div className="relative min-h-screen">
@@ -131,6 +141,27 @@ function MovieDetails() {
               </span>
             </button>
 
+            {/* Trailer */}
+            {trailerLoading && (<div className="mb-6">
+              <h2 className="font-semibold mb-2 text-2xl">Trailer</h2>
+              <p className="text-gray-400">Loading trailer...</p>
+            </div>)}
+            {!trailerLoading && trailerKey && (
+              <div className="mb-6">
+                <h2 className="font-semibold mb-2 text-2xl">Trailer</h2>
+                <div className="w-full aspect-video rounded-lg overflow-hidden shadow-lg">
+                <iframe 
+                  title={`${movie.title} Trailer`}
+                  src={`https://www.youtube.com/embed/${trailerKey}`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+                </div>
+              </div>
+            )}
+
             {/* Related Sites */}
             {movie.homepage && relatedSiteName && (
               <div className="mb-6">
@@ -138,6 +169,7 @@ function MovieDetails() {
                 <a
                   href={movie.homepage}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="px-3 py-1 bg-[#403963] rounded-full text-sm"
                 >
                   {relatedSiteName}
@@ -173,7 +205,7 @@ function MovieDetails() {
                 </h2>
                 <div className="flex flex-wrap gap-2">
                   {movie.spoken_languages.map((lan) => (
-                    <div className="px-3 py-1 text-sm rounded-full bg-[#403963] cursor-default">
+                    <div className="px-3 py-1 text-sm rounded-full bg-[#403963] cursor-default" key={lan.iso_639_1}>
                       {lan.english_name}
                     </div>
                   ))}
