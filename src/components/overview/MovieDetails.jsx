@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useFavContext } from "../../context/FavContext";
 import { getMovieDetails } from "../../service/api";
-import {MovieCast } from '../index.js'
+import { MovieCast } from "../index.js";
 import "./buttonAnimation.css";
 
 function MovieDetails() {
@@ -58,7 +58,7 @@ function MovieDetails() {
   const movieCast = movie.credits.cast;
   const sortedMovieCast = movieCast.sort((a, b) => b.popularity - a.popularity);
 
-  const relatedSiteName = movie.homepage.split('.')[1];
+  const relatedSiteName = movie.homepage.split(".")[1];
 
   return (
     <div className="relative min-h-screen">
@@ -68,7 +68,7 @@ function MovieDetails() {
           style={{ backgroundImage: `url(${backgroundImage})` }}
         />
       )}
-
+      {/* Back button */}
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
         <button
           onClick={() => navigate(-1)}
@@ -134,9 +134,15 @@ function MovieDetails() {
             {/* Related Sites */}
             {movie.homepage && relatedSiteName && (
               <div className="mb-6">
-              <h3 className="font-semibold mb-2 text-2xl">Related sites</h3>
-              <a href={movie.homepage} target="_blank" className="px-3 py-1 bg-[#403963] rounded-full text-sm">{relatedSiteName}</a>
-            </div>
+                <h3 className="font-semibold mb-2 text-2xl">Related sites</h3>
+                <a
+                  href={movie.homepage}
+                  target="_blank"
+                  className="px-3 py-1 bg-[#403963] rounded-full text-sm"
+                >
+                  {relatedSiteName}
+                </a>
+              </div>
             )}
 
             {/* Genres */}
@@ -160,20 +166,26 @@ function MovieDetails() {
               <p className="text-lg mb-3">{movie.overview}</p>
             </div>
             {/* Languages Spoken */}
-            {movie.spoken_languages && movie.spoken_languages.length > 0 &&(<div className="mb-6">
-              <h2 className="font-semibold mb-2 text-2xl">Languages Spoken in Movie</h2>
-              <div className="flex flex-wrap gap-2">
-                {movie.spoken_languages.map(lan => (
-                <div className="px-3 py-1 text-sm rounded-full bg-[#403963] cursor-default">{lan.english_name}</div>
-              ))}
+            {movie.spoken_languages && movie.spoken_languages.length > 0 && (
+              <div className="mb-6">
+                <h2 className="font-semibold mb-2 text-2xl">
+                  Languages Spoken in Movie
+                </h2>
+                <div className="flex flex-wrap gap-2">
+                  {movie.spoken_languages.map((lan) => (
+                    <div className="px-3 py-1 text-sm rounded-full bg-[#403963] cursor-default">
+                      {lan.english_name}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>)}
+            )}
             {/* Movie Cast */}
             {movie.credits?.cast && movie.credits.cast.length > 0 && (
               <div>
                 <h2 className="text-2xl font-semibold mb-4">Top Cast</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  <MovieCast movieCast={sortedMovieCast}/>
+                  <MovieCast movieCast={sortedMovieCast} />
                 </div>
               </div>
             )}
