@@ -169,9 +169,10 @@ function Recommendations() {
       )}
     </div>
   ) : (
-    <form
+    <div className="min-h-[80vh] flex items-center justify-center px-4">
+      <form
       onSubmit={handleSubmit}
-      className="flex flex-col justify-around min-h-[80vh]"
+      className="flex flex-col justify-around min-h-[80vh] w-[80vw]"
     >
         {/* Types of Movies */}
       {/* <div>
@@ -260,6 +261,7 @@ function Recommendations() {
         </button>
       </div>
     </form>
+    </div>
   );
 }
 
