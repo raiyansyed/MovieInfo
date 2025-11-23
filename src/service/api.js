@@ -2,7 +2,9 @@ const API_KEY = String(import.meta.env.VITE_API_KEY);
 const BASE_URL = String(import.meta.env.VITE_BASE_URL);
 
 export async function getPopularMovies(page = 1) {
-  const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`);
+  const response = await fetch(
+    `${BASE_URL}/movie/popular?api_key=${API_KEY}&page=${page}`
+  );
   const data = await response.json();
   return data.results;
 }
@@ -18,7 +20,45 @@ export async function searchMovies(query, page = 1) {
 }
 
 export async function getMovieDetails(movieId) {
-  const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits,videos`);
+  const response = await fetch(
+    `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&append_to_response=credits,videos`
+  );
   const data = await response.json();
   return data;
+}
+
+export async function fetchByIds(ids = []) {
+  if (!Array.isArray(ids) || ids.length === 0) return [];
+  const results = await Promise.all(
+    ids.map(async (id) => {
+      try {
+        console.log(`${BASE_URL}/movie/${id}?api_key=${API_KEY}`);
+        const res = await fetch(
+          `${BASE_URL}/movie/${id}?api_key=${API_KEY}`
+        );
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
+      }
+    })
+  );
+  return results.filter(Boolean);
+}
+
+export async function fetchByCollectionIds(collectionids = []) {
+  if(!Array.isArray(collectionids) || collectionids.length === 0) return [];
+  const results = await Promise.all(
+    collectionids.map(async (id) => {
+      try {
+        const res = await fetch(`${BASE_URL}/collection/${id}?api_key=${API_KEY}`);
+        if(!res.ok) return null;
+        return await res.json();
+      }
+      catch(err) {
+        return null;
+      }
+    })
+  )
+  return results.filter(Boolean)
 }

@@ -8,6 +8,9 @@ function NavBar() {
         Movie Pulse
       </Link>
       <div className="ml-auto flex items-center gap-8 mr-4">
+        <div className="">
+        <Link to="/recommendations">Ai Recommendations</Link>
+        </div>
         <Link to="/">Home</Link>
         <Link to="/favorites">Favorites</Link>
       </div>

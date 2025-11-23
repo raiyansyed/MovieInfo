@@ -1,25 +1,25 @@
 import { useFavContext } from "../context/FavContext";
 import { useLocation, useNavigate } from "react-router-dom";
 
-function MovieCard({ movie, currentPage, totalCount }) {
+function MovieCard({ movie, currentPage = null, totalCount = null }) {
   const { addTofavs, removeFromfavs, isFav } = useFavContext();
   const navigate = useNavigate();
   const location = useLocation();
 
   const release = movie.release_date;
-  const image = `https://image.tmdb.org/t/p/w500/${movie.poster_path}`;
+  const posterPath = movie.poster_path || movie.backdrop_path;
+  if(!posterPath) return null;
+  const image = `https://image.tmdb.org/t/p/w500/${posterPath}`;
   const fav = isFav(movie.id);
 
   const handleCardClick = () => {
     const scrollPosition = window.scrollY;
-    navigate(`/movie/${movie.id}`, {
-      state: {
-        from: location.pathname + location.search,
-        scrollPosition,
-        page: currentPage,
-        totalCount
-      }
-    });
+    const state = {
+      from : location.pathname + location.search, scrollPosition
+    }
+    if(currentPage != null) state.page = currentPage;
+    if(totalCount != null) state.totalCount = totalCount;
+    navigate(`/movie/${movie.id}`, {state});
   };
 
   return (
@@ -56,7 +56,7 @@ function MovieCard({ movie, currentPage, totalCount }) {
         </div>
         <div className="p-4">
           <h3 className="text-white text-lg font-semibold mb-1 truncate">
-            {movie.title}
+            {movie.title || movie.original_title}
           </h3>
           <p>{release ? new Date(movie.release_date).getFullYear() : "N/A"}</p>
         </div>

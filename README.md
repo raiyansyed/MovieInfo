@@ -1,4 +1,4 @@
-# 🎬 MovieInfo
+# 🎬 MoviePulse
 
 A fast movie browser built with React, Vite, and TailwindCSS. Search with suggestions, scroll infinitely, open rich movie details (cast, genres, languages), and watch trailers. Favorites and trailer lookups are cached in LocalStorage. When you return from a details page, the app restores your exact scroll position.
 

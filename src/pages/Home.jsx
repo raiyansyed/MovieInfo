@@ -24,13 +24,24 @@ function Home() {
   const location = useLocation();
   const hasRestoredScroll = useRef(false);
 
-
   const query = searchParams.get("search") || "";
 
   const fetchPage = async (p) => {
     if (query) return searchMovies(query, p);
     return getPopularMovies(p);
   };
+
+  // Removing duplicates
+  function dedeupById(arr) {
+    const seen = new Set();
+    const output = [];
+    for (const movie of arr) {
+      if (!movie || seen.has(movie.id)) continue;
+      seen.add(movie.id);
+      output.push(movie);
+    }
+    return output;
+  }
 
   // Load initial data, prefetch up to saved page if present
   useEffect(() => {
@@ -58,7 +69,7 @@ function Home() {
           all = rest.reduce((acc, arr) => acc.concat(arr || []), all);
         }
 
-        setMovies(all);
+        setMovies(dedeupById(all));
         setPage(targetPage);
         // crude hasMore guess: TMDB page size is 20
         setHasMore((all?.length || 0) >= targetPage * 20);
@@ -101,7 +112,7 @@ function Home() {
       if (!res || res.length === 0) {
         setHasMore(false);
       } else {
-        setMovies((prev) => [...prev, ...res]);
+        setMovies((prev) => dedeupById([...prev, ...res]));
         setPage(next);
       }
     } catch (e) {
@@ -137,8 +148,8 @@ function Home() {
   const handleInputChange = async (e) => {
     const value = e.target.value;
     setSearchQuery(value);
-    
-    if(!value.trim()) {
+
+    if (!value.trim()) {
       setSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -147,13 +158,10 @@ function Home() {
     const id = ++suggestionReqId.current;
     try {
       const s = await getWordSuggestions(value);
-      if(suggestionReqId.current === id) {
+      if (suggestionReqId.current === id) {
         setSuggestions(s);
       }
-    }
-    catch{
-      
-    }
+    } catch {}
   };
 
   const handleSuggestionClick = (suggestion) => {
@@ -204,14 +212,14 @@ function Home() {
               const isLast = i === movies.length - 1;
               const wrapper = (
                 <MovieCard
-                  key={m.id}
+                  key={m.id || id}
                   movie={m}
                   currentPage={page}
                   totalCount={movies.length}
                 />
               );
               return isLast ? (
-                <div key={m.id} ref={lastRef}>
+                <div key={m.id || id} ref={lastRef}>
                   {wrapper}
                 </div>
               ) : (
