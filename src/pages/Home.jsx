@@ -1,22 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { getPopularMovies, searchMovies } from "../service/api";
-import getWordSuggestions from "../service/suggestions";
 import { MovieCard } from "../components/index.js";
 
 function Home() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [searchQuery, setSearchQuery] = useState(
-    searchParams.get("search") || ""
-  );
+  const [searchParams] = useSearchParams();
+
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
-  const suggestionReqId = useRef(0);
-  const [showSuggestions, setShowSuggestions] = useState(false);
 
-  // Infinite scrolling states
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -31,7 +24,6 @@ function Home() {
     return getPopularMovies(p);
   };
 
-  // Removing duplicates
   function dedeupById(arr) {
     const seen = new Set();
     const output = [];
@@ -43,7 +35,6 @@ function Home() {
     return output;
   }
 
-  // Load initial data, prefetch up to saved page if present
   useEffect(() => {
     let cancelled = false;
     const init = async () => {
@@ -53,14 +44,11 @@ function Home() {
 
       try {
         const targetPage = Math.max(1, Number(location.state?.page) || 1);
-
-        // fetch page 1 first
         const first = await fetchPage(1);
         if (cancelled) return;
 
         let all = [...first];
 
-        // prefetch 2..targetPage if needed
         if (targetPage > 1) {
           const pagePromises = [];
           for (let p = 2; p <= targetPage; p++) pagePromises.push(fetchPage(p));
@@ -71,7 +59,6 @@ function Home() {
 
         setMovies(dedeupById(all));
         setPage(targetPage);
-        // crude hasMore guess: TMDB page size is 20
         setHasMore((all?.length || 0) >= targetPage * 20);
       } catch (e) {
         if (!cancelled) {
@@ -88,7 +75,6 @@ function Home() {
     };
   }, [query, location.state?.page]);
 
-  // Restore scroll AFTER movies render
   useEffect(() => {
     if (
       !loading &&
@@ -135,102 +121,89 @@ function Home() {
     [loading, loadingMore, hasMore, loadMore]
   );
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-
-    setShowSuggestions(false);
-    setSuggestions([]);
-    setSearchParams({ search: searchQuery });
-    setSearchQuery("");
-  };
-
-  const handleInputChange = async (e) => {
-    const value = e.target.value;
-    setSearchQuery(value);
-
-    if (!value.trim()) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-    setShowSuggestions(true);
-    const id = ++suggestionReqId.current;
-    try {
-      const s = await getWordSuggestions(value);
-      if (suggestionReqId.current === id) {
-        setSuggestions(s);
-      }
-    } catch {}
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    setSearchQuery(suggestion);
-    setSuggestions([]);
-    setSearchParams({ search: suggestion });
-  };
-
   return (
-    <div className="w-full">
-      <div className="relative max-w-[600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Enter the movie name"
-            value={searchQuery}
-            onChange={handleInputChange}
-            className="flex-1 h-12 rounded-full bg-white border-white/20 placeholder-gray-300 px-5 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-black"
-          />
-          <button
-            type="submit"
-            className="h-12 px-6 rounded-full bg-[#ce806f] hover:bg-indigo-600 text-white font-medium transition ml-1"
-          >
-            Search
-          </button>
-        </form>
-        {suggestions.length > 0 && (
-          <ul className="absolute left-4 right-4 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-y-auto z-10">
-            {suggestions.map((suggestion, index) => (
-              <li
-                key={index}
-                onClick={() => handleSuggestionClick(suggestion)}
-                className="px-5 py-3 text-black hover:bg-indigo-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0 first:rounded-t-lg last:rounded-b-lg"
+    <div className="space-y-10 mt-16">
+      <section className="surface-card border border-(--border) rounded-2xl p-6 sm:p-8">
+        <div className="flex flex-col lg:flex-row lg:items-end gap-6">
+          <div className="space-y-4 max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.3em] text-muted">
+              Daily picks
+            </p>
+            <h1 className="text-3xl font-semibold leading-tight">
+              Discover what the world is watching now.
+            </h1>
+            <p className="text-muted text-sm sm:text-base">
+              Browse the live popularity feed or filter with the search bar in
+              the header. Use recommendations for AI generated suggestions, or
+              save titles into your favorites list.
+            </p>
+            <div className="flex flex-wrap gap-3 text-sm">
+              <Link
+                to="/recommendations"
+                className="inline-flex items-center gap-2 border border-(--text) text-(--text) px-4 py-2 rounded-full"
               >
-                {suggestion}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                Open recommendations
+              </Link>
+              <Link
+                to="/favorites"
+                className="inline-flex items-center gap-2 border border-(--border) text-muted px-4 py-2 rounded-full"
+              >
+                View favorites
+              </Link>
+            </div>
+          </div>
+          <div className="flex gap-8 text-sm text-muted">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em]">Movies</p>
+              <p className="text-3xl font-semibold text-(--text)">
+                {movies.length || "–"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em]">Page</p>
+              <p className="text-3xl font-semibold text-(--text)">{page}</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {loading && <p className="text-center">Loading...</p>}
-      {error && <p className="text-center text-red-500">{error}</p>}
+      {loading && (
+        <div className="flex justify-center py-10 text-muted">Loading…</div>
+      )}
+      {error && (
+        <p className="text-center text-rose-500 border border-rose-200 bg-rose-50 rounded-2xl py-4">
+          {error}
+        </p>
+      )}
       {!loading && !error && (
         <>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-4">
-            {movies.map((m, i) => {
-              const isLast = i === movies.length - 1;
-              const wrapper = (
-                <MovieCard
-                  key={m.id || id}
-                  movie={m}
-                  currentPage={page}
-                  totalCount={movies.length}
-                />
-              );
-              return isLast ? (
-                <div key={m.id || id} ref={lastRef}>
-                  {wrapper}
-                </div>
-              ) : (
-                wrapper
-              );
-            })}
-          </div>
-          {loadingMore && <p className="text-center mt-4">Loading more...</p>}
+          {(() => {
+            const visible = movies.filter(
+              (m) => m && (m.poster_path || m.backdrop_path)
+            );
+            return (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                {visible.map((m, i) => {
+                  const isLast = i === movies.length - 1;
+                  return (
+                    <div key={m.id || i} ref={isLast ? lastRef : undefined}>
+                      <MovieCard
+                        movie={m}
+                        currentPage={page}
+                        totalCount={movies.length}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })()}
+          {loadingMore && (
+            <p className="text-center mt-6 text-muted">Loading more…</p>
+          )}
           {!hasMore && movies.length > 0 && (
-            <p className="text-center mt-4 text-gray-400">
-              No more movies to load
+            <p className="text-center mt-6 text-muted">
+              That’s everything for now.
             </p>
           )}
         </>

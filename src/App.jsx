@@ -2,19 +2,22 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Favs from "./pages/Favs";
 import { FavProvider } from "./context/FavContext";
-import {MovieDetails, NavBar, Recommendations} from './components/index.js'
+import { MovieDetails, NavBar, Recommendations } from "./components/index.js";
+
 function App() {
   return (
     <FavProvider>
-      <NavBar />
-      <main className="p-8 flex-1 flex flex-col box-border">
-        <Routes>
-          <Route index element={<Home />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/favorites" element={<Favs />} />
-          <Route path="/movie/:id" element={<MovieDetails/>} />
-        </Routes>
-      </main>
+      <div className="min-h-screen bg-(--bg) text-(--text)">
+        <NavBar />
+        <main className="max-w-6xl mx-auto px-4 sm:px-8 py-10">
+          <Routes>
+            <Route index element={<Home />} />
+            <Route path="/recommendations" element={<Recommendations />} />
+            <Route path="/favorites" element={<Favs />} />
+            <Route path="/movie/:id" element={<MovieDetails />} />
+          </Routes>
+        </main>
+      </div>
     </FavProvider>
   );
 }

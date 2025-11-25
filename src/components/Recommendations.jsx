@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { MovieCard } from "./index.js";
-import { languages, tmdbGenres, typeOfMovie } from "./data.js"
+import { languages, tmdbGenres, typeOfMovie } from "./data.js";
 import { fetchByIds, fetchByCollectionIds } from "../service/api.js";
 import { aiRecommendations } from "../service/aiRecomendations.js";
-import {useLocation} from 'react-router-dom'
+import { useLocation } from "react-router-dom";
 
 function Recommendations() {
   const moodLimit = 3,
@@ -24,26 +24,24 @@ function Recommendations() {
   const [error, setError] = useState(null);
   const location = useLocation();
 
-  const Result_key = 'ai_results';
+  const Result_key = "ai_results";
 
   React.useEffect(() => {
-    if(location.state?.recommendationsSelection === false) {
-      setSelection(false)
+    if (location.state?.recommendationsSelection === false) {
+      setSelection(false);
     }
-    const saved = sessionStorage.getItem(Result_key)
-    if(saved) {
+    const saved = sessionStorage.getItem(Result_key);
+    if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if(parsed.individual?.length || parsed.collections?.length) {
+        if (parsed.individual?.length || parsed.collections?.length) {
           setIndividualMovies(parsed.individual || []);
-          setCollectionMovies(parsed.collections || [])
+          setCollectionMovies(parsed.collections || []);
           setSelection(false);
         }
-      }
-      catch{}
+      } catch {}
     }
-  }, [location.state])
-
+  }, [location.state]);
 
   function toggleGenre(id) {
     setGenreSelected((prev) =>
@@ -91,41 +89,39 @@ function Recommendations() {
         minRating: 7.0,
         yearRange: "Any",
       });
-      console.log(data);
       if (Array.isArray(data)) {
         const movieIds = data
-          .filter(item => item.type?.toLowerCase() === "movie")
-          .map(item => item.id)
+          .filter((item) => item.type?.toLowerCase() === "movie")
+          .map((item) => item.id)
           .filter(Boolean);
 
         const collectionIds = data
-          .filter(item => item.type?.toLowerCase() === "collection")
-          .map(item => item.id)
+          .filter((item) => item.type?.toLowerCase() === "collection")
+          .map((item) => item.id)
           .filter(Boolean);
 
-        let moviesFetched = []
-        let collectionsFetched = []
+        let moviesFetched = [];
+        let collectionsFetched = [];
 
-        if(movieIds.length) {
+        if (movieIds.length) {
           moviesFetched = await fetchByIds(movieIds);
           setIndividualMovies(moviesFetched || []);
         }
-        
-        if(collectionIds.length) {
+
+        if (collectionIds.length) {
           collectionsFetched = await fetchByCollectionIds(collectionIds);
           setCollectionMovies(collectionsFetched || []);
         }
 
         sessionStorage.setItem(
-          Result_key, 
+          Result_key,
           JSON.stringify({
-            individual: moviesFetched, 
+            individual: moviesFetched,
             collections: collectionsFetched,
           })
-        )
-      }
-      else {
-        throw new Error("AI response not an array")
+        );
+      } else {
+        throw new Error("AI response not an array");
       }
     } catch (err) {
       setError(err);
@@ -139,128 +135,162 @@ function Recommendations() {
     setSelection(true);
     setIndividualMovies([]);
     setCollectionMovies([]);
-    sessionStorage.removeItem(
-      Result_key
-    )
-  }
+    sessionStorage.removeItem(Result_key);
+  };
+
+  const results = [
+    ...individualMovies,
+    ...collectionMovies.flatMap((c) => (Array.isArray(c.parts) ? c.parts : [])),
+  ];
 
   return !selection ? (
-    <div>
-      {loading && <p className="flex items-center justify-center">Loading...</p>}
-      {error && <p className="text-center text-red-500">{error.message || String(error)}</p>}
-      {!loading && !error && (
-        <div className="">
-          <button
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-xs uppercase tracking-[0.3em] text-muted">
+            AI results
+          </p>
+          <h2 className="text-2xl font-semibold text-(--text)">Suggested titles</h2>
+        </div>
+        <button
           onClick={handleBackClick}
-          className="mb-6 px-4 py-2 rounded-lg transition bg-[#403963] hover:bg-[#524a7a] hover:cursor-pointer"
+          className="inline-flex items-center rounded-full border border-(--border) px-4 py-2 text-sm text-(--text)"
         >
-          ← Back
+          Adjust filters
         </button>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 px-4">
-            {[
-              ...individualMovies,
-              ...collectionMovies.flatMap(c => Array.isArray(c.parts) ? c.parts : [])
-            ].map((m, i) => (
-              <MovieCard key={m.id || i} movie={m} />
-            ))
-            }
-          </div>
+      </div>
+      {loading && <p className="text-muted">Loading…</p>}
+      {error && (
+        <p className="text-rose-500 border border-rose-200 bg-rose-50 rounded-xl p-3">
+          {error.message || String(error)}
+        </p>
+      )}
+      {!loading && !error && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          {results.map((m, i) => (
+            <MovieCard key={m.id || i} movie={m} />
+          ))}
         </div>
       )}
     </div>
   ) : (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <form
-      onSubmit={handleSubmit}
-      className="flex flex-col justify-around min-h-[80vh] w-[80vw]"
-    >
-        {/* Types of Movies */}
-      {/* <div>
-        <h3 className="font-semibold p-3 text-center text-2xl pb-5 shadow-2xl text-shadow-amber-50">
-          Types Of Movies : Upto {moodLimit}
-        </h3>
-        <div className="grid gap-1 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-y-1 gap-x-3">
-          {typeOfMovie.map((type, i) => (
-            <label key={i} className="cursor-pointer text-lg">
-              <input
-                type="checkbox"
-                value={type}
-                checked={movieTypeSelected.includes(type)}
-                onChange={() => toggleMovieTypes(type)}
-                className="mr-6"
-              />
-              {type}
-            </label>
-          ))}
+    <div className="surface-card border border-(--border) rounded-2xl p-6 sm:p-8">
+      <form className="space-y-8" onSubmit={handleSubmit}>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-semibold text-(--text)">
+            Tell us what you&apos;re in the mood for
+          </h2>
+          <p className="text-sm text-muted">
+            Combine up to {genreLimit} genres, {moodLimit} moods, and {languagesLimit}
+            {" "}
+            languages. Add a short description if needed.
+          </p>
         </div>
-      </div> */}
-        {/* Languages */}
-      {/* <div>
-        <h3 className="font-semibold p-3 text-center text-2xl pb-5 shadow-2xl text-shadow-amber-50">
-          Languages
-        </h3>
-        <div className="grid gap-1 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-y-1 gap-x-3">
-          {languages.map((lang, i) => (
-            <label key={lang} className="cursor-pointer text-lg">
-              <input
-                type="checkbox"
-                value={lang}
-                checked={languagesSelected.includes(lang)}
-                onChange={() => toggleLanguages(lang)}
-                className="mr-6"
-              />
-              {lang}
-            </label>
-          ))}
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <p className="font-medium text-(--text)">Moods</p>
+            <span className="text-muted">
+              {movieTypeSelected.length}/{moodLimit}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm">
+            {typeOfMovie.map((type) => {
+              const active = movieTypeSelected.includes(type);
+              return (
+                <button
+                  type="button"
+                  key={type}
+                  onClick={() => toggleMovieTypes(type)}
+                  className={`px-3 py-1.5 rounded-full border text-sm ${
+                    active
+                      ? "border-(--text) text-(--text)"
+                      : "border-(--border) text-muted"
+                  }`}
+                >
+                  {type}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div> */}
-      <div>
-        {/* Genres */}
-        <h3 className="font-semibold p-3 text-center text-2xl">
-          Genres : Upto {genreLimit}
-        </h3>
-        <div className="grid gap-1 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-y-1 gap-x-3">
-          {tmdbGenres.map((g) => (
-            <label key={g.value} className="cursor-pointer text-lg">
-              <input
-                type="checkbox"
-                value={g.value}
-                checked={genreSelected.includes(g.value)}
-                onChange={() => toggleGenre(g.value)}
-                className="mr-6"
-              />
-              {g.label}
-            </label>
-          ))}
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <p className="font-medium text-(--text)">Languages</p>
+            <span className="text-muted">
+              {languagesSelected.length}/{languagesLimit}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2 text-sm">
+            {languages.map((lang) => {
+              const active = languagesSelected.includes(lang);
+              return (
+                <button
+                  type="button"
+                  key={lang}
+                  onClick={() => toggleLanguages(lang)}
+                  className={`px-3 py-1.5 rounded-full border ${
+                    active
+                      ? "border-(--text) text-(--text)"
+                      : "border-(--border) text-muted"
+                  }`}
+                >
+                  {lang}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
-      <div>
-        {/* Description Box */}
-        <h3 className="font-semibold text-2xl text-center p-3">
-          Description (If any)
-        </h3>
-        <textarea
-          value={description}
-          onChange={(e) =>
-            setDescription(e.target.value.slice(0, descriptionLimit))
-          }
-          disabled={
-            !genreSelected.length && !!movieTypeSelected.length && !description
-          }
-          className="border border-white rounded-lg w-full p-2 text-sm resize-vertical min-h-50 outline-none"
-          placeholder="Description The Movie You want to watch"
-        ></textarea>
-      </div>
-      <div className="text-center mt-4">
-        {/* Button */}
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-sm">
+            <p className="font-medium text-(--text)">Genres</p>
+            <span className="text-muted">
+              {genreSelected.length}/{genreLimit}
+            </span>
+          </div>
+          <div className="grid gap-2 grid-cols-[repeat(auto-fill,minmax(150px,1fr))] text-sm">
+            {tmdbGenres.map((g) => (
+              <label
+                key={g.value}
+                className="flex items-center gap-2 border border-(--border) rounded-xl px-3 py-2"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-black"
+                  value={g.value}
+                  checked={genreSelected.includes(g.value)}
+                  onChange={() => toggleGenre(g.value)}
+                />
+                {g.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="font-medium text-(--text)">Description (optional)</label>
+          <textarea
+            value={description}
+            onChange={(e) =>
+              setDescription(e.target.value.slice(0, descriptionLimit))
+            }
+            className="w-full min-h-[120px] border border-(--border) rounded-xl p-3 text-sm bg-transparent text-(--text)"
+            placeholder="Mention tone, pace, era, cast, or any specific prompt."
+          ></textarea>
+          <p className="text-right text-xs text-muted">
+            {description.length}/{descriptionLimit}
+          </p>
+        </div>
+
         <button
-        type="submit"
-          className="border-none px-10 py-5 rounded-full bg-gray-700 hover:cursor-pointer hover:bg-gray-500"
+          type="submit"
+          className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-2 rounded-full border border-(--text) text-(--text) text-sm font-medium"
         >
-          Search
+          Generate suggestions
         </button>
-      </div>
-    </form>
+      </form>
     </div>
   );
 }
