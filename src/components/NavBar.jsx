@@ -45,10 +45,10 @@ function NavBar() {
 
   const handleInputChange = (e) => {
     const value = e.target.value;
-    setSearchQuery(value)
+    setSearchQuery(value);
     const query = value.trim();
 
-    if(debounceRef.current) clearTimeout(debounceRef.current)
+    if (debounceRef.current) clearTimeout(debounceRef.current);
 
     if (query.length < 3) {
       setSuggestions([]);
@@ -80,9 +80,9 @@ function NavBar() {
 
   useEffect(() => {
     return () => {
-      if(debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [])
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
 
   const links = [
     { to: "/", label: "Home" },
@@ -167,10 +167,43 @@ function NavBar() {
           </label>
         </div>
 
+        <form
+          onSubmit={handleSubmit}
+          className="flex items-center gap-2 text-sm text-(--muted) border border-(--border) rounded-full px-4 py-2 relative ml-auto"
+        >
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleInputChange}
+            placeholder="Search movies"
+            className="flex-1 bg-transparent outline-none text-(--text)placeholder:text-(--muted)"
+          />
+          <button
+            type="submit"
+            className="text-(--text) font-medium cursor-pointer"
+          >
+            Go
+          </button>
+          {showSuggestions && suggestions.length > 0 && (
+            <ul className="absolute top-full left-0 right-0 mt-2 bg-(--card) border border-(--border) rounded-lg shadow max-h-60 overflow-y-auto text-(--text) z-20">
+              {suggestions.map((s, i) => (
+                <li key={i}>
+                  <button
+                    onClick={() => handleSuggestionClick(s)}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-(--border)/40 transition-colors"
+                  >
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </form>
+
         {/* Mobile hamburger */}
         <button
           aria-label="Toggle menu"
-          className="md:hidden border border-(--border) rounded-full w-10 h-10 flex items-center justify-center"
+          className="md:hidden ml-auto border border-(--border) rounded-full w-10 h-10 flex items-center justify-center"
           onClick={toggle}
         >
           <div className="w-5 space-y-1.5">
@@ -187,62 +220,7 @@ function NavBar() {
           open ? "max-h-112" : "max-h-0"
         }`}
       >
-        <div className="px-4 sm:px-8 py-4 flex flex-col gap-4">
-          <form
-            onSubmit={handleSubmit}
-            className="flex items-center gap-2 text-sm text-(--muted) border border-(--border) rounded-full px-4 py-2 relative"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={handleInputChange}
-              placeholder="Search movies"
-              className="flex-1 bg-transparent outline-none text-(--text)placeholder:text-(--muted)"
-            />
-            <button
-              type="submit"
-              className="text-(--text) font-medium cursor-pointer"
-            >
-              Go
-            </button>
-            {showSuggestions && suggestions.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 mt-2 bg-(--card) border border-(--border) rounded-lg shadow max-h-60 overflow-y-auto text-(--text) z-20">
-                {suggestions.map((s, i) => (
-                  <li key={i}>
-                    <button
-                      onClick={() => handleSuggestionClick(s)}
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-(--border)/40 transition-colors"
-                    >
-                      {s}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </form>
-
-          <div className="flex items-center">
-            <input
-              id="theme-toggle-mobile"
-              type="checkbox"
-              className="peer sr-only"
-              checked={theme === "dark"}
-              onChange={() =>
-                setTheme((t) => (t === "light" ? "dark" : "light"))
-              }
-              aria-label="Toggle dark mode"
-            />
-            <label
-              htmlFor="theme-toggle-mobile"
-              className="relative flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-400 px-0.5 transition-colors before:absolute before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform peer-checked:bg-green-500 peer-checked:before:translate-x-5"
-            >
-              <span className="sr-only">Toggle theme</span>
-            </label>
-            <span className="ml-3 text-sm text-(--muted)">
-              {theme === "light" ? "Light" : "Dark"} mode
-            </span>
-          </div>
-
+        <div className="px-4 sm:px-8 py-4 flex flex-row gap-4">
           <nav className="flex flex-col gap-3 text-sm text-(--muted)">
             {links.map((l) => (
               <Link
@@ -258,6 +236,28 @@ function NavBar() {
               </Link>
             ))}
           </nav>
+          <div className="flex gap-1.5 items-center justify-center flex-col ml-auto">
+            <span className="ml-3 text-sm text-(--muted)">
+              {theme === "light" ? "Light" : "Dark"} mode
+            </span>
+            <input
+              id="theme-toggle-mobile"
+              type="checkbox"
+              className="peer sr-only"
+              checked={theme === "dark"}
+              onChange={() =>
+                setTheme((t) => (t === "light" ? "dark" : "light"))
+              }
+              onClick={close}
+              aria-label="Toggle dark mode"
+            />
+            <label
+              htmlFor="theme-toggle-mobile"
+              className="relative flex h-6 w-11 cursor-pointer items-center rounded-full bg-gray-400 px-0.5 transition-colors before:absolute before:left-0.5 before:h-5 before:w-5 before:rounded-full before:bg-white before:shadow before:transition-transform peer-checked:bg-green-500 peer-checked:before:translate-x-5"
+            >
+              <span className="sr-only">Toggle theme</span>
+            </label>
+          </div>
         </div>
       </div>
     </header>
