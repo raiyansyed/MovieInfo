@@ -9,7 +9,7 @@ A fast movie browser built with React, Vite, and TailwindCSS. Search with sugges
 
 ## Features
 
-- 🔍 Search with typeahead suggestions
+- 🔍 Search with typeahead suggestions (always visible, responsive, debounced, uses TMDB `/search/movie`)
 - ♾️ Infinite scrolling (Intersection Observer)
 - 📄 Movie details: overview, genres, spoken languages, and top cast
 - ▶️ Trailers
@@ -18,6 +18,10 @@ A fast movie browser built with React, Vite, and TailwindCSS. Search with sugges
 - ⭐ Favorites (persisted in LocalStorage)
 - ↩️ Back-navigation scroll restoration
 - 🌙 Modern dark UI with TailwindCSS, fully responsive
+- 🌓 Theme toggle (light/dark, persists in localStorage)
+- 📱 Responsive NavBar: logo left, search center, links/theme right, hamburger toggles links/theme on mobile
+- 🧹 No gaps for movies without posters (cards filtered out)
+- 🏎️ Debounced and cached API requests for suggestions (prevents rate limit exhaustion)
 
 ---
 
@@ -25,7 +29,7 @@ A fast movie browser built with React, Vite, and TailwindCSS. Search with sugges
 
 - React + Vite
 - React Router
-- TailwindCSS
+- TailwindCSS (with CSS variables for theme)
 - TMDB API (primary data + videos)
 - YouTube Data API v3 (optional fallback for trailers)
 - LocalStorage (favorites + trailer cache)
@@ -35,29 +39,24 @@ A fast movie browser built with React, Vite, and TailwindCSS. Search with sugges
 ## Project Structure
 
 ```bash
-movieInfo/
+MoviePulse/
 ├─ public/
 ├─ src/
 │  ├─ components/
-│  │   ├─ NavBar.jsx
-│  │   ├─ MovieCard.jsx
+│  │   ├─ NavBar.jsx         # Responsive, fixed, always-visible search bar
+│  │   ├─ MovieCard.jsx      # Filters out movies without posters
+│  │   ├─ Recommendations.jsx
 │  │   ├─ index.js
-│  │   └─ overview/
-│  │        ├─ MovieDetails.jsx
-│  │        ├─ MovieCast.jsx
-│  │        └─ buttonAnimation.css
-│  ├─ context/
-│  │   └─ FavContext.jsx
+│  │   └─ data.js
 │  ├─ pages/
-│  │   ├─ Home.jsx
-│  │   └─ Favs.jsx
+│  │   ├─ Home.jsx           # Infinite scroll, search, scroll restore
 │  ├─ service/
 │  │   ├─ api.js             # TMDB API helpers
-│  │   ├─ suggestions.js     # typeahead suggestions
-│  │   └─ youtubeSearch.js   # YouTube fallback + LocalStorage cache
+│  │   ├─ suggestions.js     # Debounced/cached typeahead suggestions
+│  │   ├─ aiRecomendations.js
 │  ├─ App.jsx
 │  ├─ main.jsx
-│  └─ index.css
+│  └─ index.css              # Tailwind + theme CSS variables
 ├─ .env            # your local env (not committed)
 ├─ .env.example    # sample env to copy from
 ├─ package.json
@@ -75,8 +74,8 @@ VITE_API_KEY=YOUR_TMDB_API_KEY
 VITE_BASE_URL=https://api.themoviedb.org/3
 
 # Optional: only needed if you want YouTube fallback search.
-# Playing an embed by ID does not use quota; only API search does.
 VITE_YT_API_KEY=YOUR_YOUTUBE_DATA_API_KEY
+VITE_GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 ```
 
 Notes:
@@ -109,10 +108,16 @@ npm run preview
 
 ## Implementation Notes
 
+### NavBar & Search
+- NavBar is fixed, always visible, and fully responsive.
+- Logo left, search bar center (flex-1, min-w-0), links/theme right.
+- Hamburger icon toggles links/theme on mobile; search bar remains visible.
+- Search suggestions use TMDB `/search/movie`, debounced (350ms), cached, and require at least 3 characters.
+- Suggestions dropdown overlays below search input, closes on outside click or navigation.
+
 ### Infinite Scrolling
-- Uses an Intersection Observer on the last card to fetch the next page.
-- Appends new results to the existing list.
-- Works for both “Popular” and “Search” paths.
+- Uses an Intersection Observer on the last visible card to fetch the next page.
+- Filters out movies without posters/backdrops before rendering grid (no empty gaps).
 
 ### Scroll Restoration
 - When a MovieCard is clicked, the current scroll position, page, and list length are passed via `location.state`.
@@ -136,7 +141,7 @@ localStorage.removeItem('yt_trailer_cache');
 ```
 
 ### Favorites
-- Stored in LocalStorage and managed via context (`FavContext`).
+- Stored in LocalStorage and managed via context.
 
 ---
 
@@ -148,6 +153,8 @@ localStorage.removeItem('yt_trailer_cache');
   - Restart `npm run dev` after editing `.env`.
 - Back button doesn’t restore position:
   - Use the app’s back button in MovieDetails (it passes state) and ensure Home waits for data to render before scrolling.
+- Search suggestions not showing:
+  - Ensure TMDB API key is set and not rate-limited. Suggestions require at least 3 characters.
 
 ---
 
